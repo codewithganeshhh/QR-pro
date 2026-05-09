@@ -10,7 +10,16 @@ const Request = require('./models/Request');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        'http://localhost:5000',
+        'http://localhost:3000',
+        'http://127.0.0.1:5500', // Live Server
+        /\.vercel\.app$/,        // any *.vercel.app domain
+        /\.onrender\.com$/       // Render itself
+    ],
+    credentials: true
+}));
 app.use(express.json({ limit: '50mb' }));
 
 // Serve frontend static files (HTML, CSS, JS, assets)

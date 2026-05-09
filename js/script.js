@@ -4,10 +4,10 @@ let pendingRequests = [];
 let qrcodeInstance = null;
 let currentQRId = null;
 
-// Auto-detect API URL: use relative path on production, localhost for development
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+// Auto-detect API URL: localhost for dev, Render backend for production
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000/api'
-    : '/api';
+    : 'https://qr-pro-zqwd.onrender.com/api';
 
 // --- CLOUDINARY CONFIGURATION ---
 // Replace these with your own details from Cloudinary dashboard
