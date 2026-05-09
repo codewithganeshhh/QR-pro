@@ -25,10 +25,21 @@ app.use(express.json({ limit: '50mb' }));
 // Serve frontend static files (HTML, CSS, JS, assets)
 app.use(express.static(path.join(__dirname, '..')));
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// Connect to MongoDB with retry
+const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI, {
+            serverSelectionTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
+        });
+        console.log('MongoDB connected');
+    } catch (err) {
+        console.error('MongoDB connection error:', err.message);
+        console.log('Retrying in 5 seconds...');
+        setTimeout(connectDB, 5000);
+    }
+};
+connectDB();
 
 // --- API ROUTES ---
 
