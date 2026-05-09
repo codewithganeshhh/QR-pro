@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Pro — Smart Customer Management</title>
+    <meta name="description" content="Generate QR codes for every customer. Share digital business cards instantly.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #ec4899;
+            --bg: #f0f2f5;
+            --text: #1a1f36;
+            --navbar-bg: rgba(255,255,255,0.88);
+            --navbar-border: rgba(0,0,0,0.06);
+            --nav-link: #1a1f36;
+            --card-bg: #ffffff;
+            --card-border: rgba(0,0,0,0.06);
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            --muted: #6b7280;
+            --section-alt: #f0f2f5;
+            --toggle-bg: rgba(0,0,0,0.07);
+            --toggle-color: #374151;
+        }
+        [data-theme="dark"] {
+            --bg: #0d0f18;
+            --text: #e2e8f0;
+            --navbar-bg: rgba(13,15,24,0.95);
+            --navbar-border: rgba(255,255,255,0.07);
+            --nav-link: #e2e8f0;
+            --card-bg: #1a1d2e;
+            --card-border: rgba(255,255,255,0.07);
+            --card-shadow: 0 4px 24px rgba(0,0,0,0.25);
+            --muted: #94a3b8;
+            --section-alt: #0d0f18;
+            --toggle-bg: rgba(255,255,255,0.08);
+            --toggle-color: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
+
+
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 92vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            position: relative;
+            overflow: hidden;
+            padding: 80px 0;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(99,102,241,0.3) 0, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(168,85,247,0.3) 0, transparent 50%),
+                radial-gradient(circle at 60% 80%, rgba(236,72,153,0.2) 0, transparent 40%);
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(99,102,241,0.2);
+            border: 1px solid rgba(99,102,241,0.5);
+            color: #a5b4fc;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+        .hero h1 span {
+            background: linear-gradient(135deg, #a5b4fc, #f0abfc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            color: rgba(255,255,255,0.65);
+            font-size: 1.1rem;
+            line-height: 1.7;
+            max-width: 500px;
+            margin-bottom: 36px;
+        }
+        .btn-hero-primary {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4);
+        }
+        .btn-hero-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-3px);
+            box-shadow: 0 14px 40px rgba(37, 99, 235, 0.5);
+            color: white;
+        }
+        .btn-hero-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 16px 36px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .btn-hero-secondary:hover {
+            background: rgba(255,255,255,0.18);
+            color: white;
+            transform: translateY(-3px);
+        }
+        /* QR mockup */
+        .hero-mockup {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 28px;
+            padding: 36px 32px 28px;
+            text-align: center;
+            backdrop-filter: blur(14px);
+            animation: float 4s ease-in-out infinite;
+            box-shadow: 0 0 60px rgba(99,102,241,0.15), inset 0 0 40px rgba(255,255,255,0.02);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50%       { transform: translateY(-14px) rotate(0.5deg); }
+        }
+        /* QR Code SVG wrapper */
+        .qr-preview {
+            width: 190px;
+            height: 190px;
+            background: white;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(99,102,241,0.25), 0 2px 8px rgba(0,0,0,0.15);
+            padding: 12px;
+        }
+        /* QR corner decorators */
+        .qr-preview::before, .qr-preview::after {
+            content: '';
+            position: absolute;
+            width: 28px; height: 28px;
+            border-color: #6366f1;
+            border-style: solid;
+            z-index: 10;
+        }
+        .qr-preview::before {
+            top: 6px; left: 6px;
+            border-width: 3px 0 0 3px;
+            border-radius: 4px 0 0 0;
+        }
+        .qr-preview::after {
+            bottom: 6px; right: 6px;
+            border-width: 0 3px 3px 0;
+            border-radius: 0 0 4px 0;
+        }
+        /* Scan line animation */
+        .qr-scan-line {
+            position: absolute;
+            left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #6366f1, #a855f7, #6366f1, transparent);
+            animation: scan 2.5s ease-in-out infinite;
+            z-index: 5;
+            box-shadow: 0 0 10px rgba(99,102,241,0.8);
+        }
+        @keyframes scan {
+            0%   { top: 10%; opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { top: 90%; opacity: 0; }
+        }
+        .qr-svg { width: 100%; height: 100%; }
+        .hero-stat {
+            display: inline-block;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .hero-stat h3 { color: #fff; font-weight: 800; font-size: 1.6rem; }
+        .hero-stat p  { color: rgba(255,255,255,0.5); font-size: 0.8rem; margin: 0; }
+
+        /* ── Features ── */
+        .features { padding: 100px 0; background: var(--section-alt); transition: background 0.3s; }
+        .section-label {
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+        .section-sub {
+            color: var(--muted);
+            font-size: 1.05rem;
+            max-width: 520px;
+            margin: 0 auto 60px;
+        }
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 36px 28px;
+            height: 100%;
+            border: 1px solid var(--card-border);
+            transition: all 0.35s;
+            box-shadow: var(--card-shadow);
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(99,102,241,0.12);
+            border-color: rgba(99,102,241,0.2);
+        }
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(168,85,247,0.12));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        .feature-card h5 {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        .feature-card p {
+            color: var(--muted);
+            font-size: 0.93rem;
+            line-height: 1.65;
+            margin: 0;
+        }
+
+        /* ── CTA ── */
+        .cta-section {
+            background: linear-gradient(135deg, #0f0c29, #302b63);
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(99,102,241,0.25) 0, transparent 60%);
+        }
+        .cta-section h2 {
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+        }
+        .cta-section p {
+            color: rgba(255,255,255,0.6);
+            font-size: 1.05rem;
+            margin-bottom: 36px;
+        }
+
+        /* ── Footer ── */
+        footer {
+            background: #0f0c29;
+            color: rgba(255,255,255,0.5);
+            text-align: center;
+            padding: 28px 20px;
+            font-size: 0.88rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        footer a { color: #a5b4fc; text-decoration: none; }
+        /* Professional Footer Styling */
+        .main-footer {
+            background: var(--navbar-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--navbar-border);
+            padding: 80px 0 30px;
+            margin-top: 0;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+        .footer-logo {
+            font-weight: 800;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            text-decoration: none;
+        }
+        .footer-description {
+            opacity: 0.7;
+            font-size: 0.98rem;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            max-width: 320px;
+        }
+        .footer-heading {
+            font-weight: 700;
+            font-size: 1.15rem;
+            margin-bottom: 25px;
+            position: relative;
+            color: var(--text);
+        }
+        .footer-heading::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 35px;
+            height: 2.5px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .footer-links li {
+            margin-bottom: 14px;
+        }
+        .footer-links a {
+            text-decoration: none;
+            color: var(--text);
+            opacity: 0.65;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .footer-links a:hover {
+            opacity: 1;
+            color: var(--primary);
+            transform: translateX(6px);
+        }
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+        .social-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        .social-btn:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+            border-color: transparent;
+        }
+        .footer-bottom {
+            border-top: 1px solid var(--card-border);
+            margin-top: 60px;
+            padding-top: 30px;
+            text-align: center;
+            font-size: 0.92rem;
+        }
+        .footer-bottom p {
+            opacity: 0.6;
+            margin: 0;
+        }
+        [data-theme="dark"] .main-footer {
+            background: rgba(13, 15, 24, 0.98);
+        }
+        [data-theme="dark"] .social-btn {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .feature-icon-wrapper {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: rgba(99,102,241,0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+        .feature-bg-shape {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            z-index: 1;
+            transition: transform 0.6s ease-out;
+        }
+        .feature-card:hover .feature-bg-shape {
+            transform: translate(-50%, -50%) rotate(45deg) scale(1.2);
+        }
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(99,102,241,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════ NAVBAR ══════════════ -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">
+            <i class="bi bi-qr-code-scan me-2"></i>QR Pro
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
+                <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                <li class="nav-item ms-2 d-flex align-items-center gap-2">
+                    <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+                        <i class="bi bi-moon-fill"></i>
+                    </button>
+                    <a class="btn-admin" href="request-qr.html">
+                        <i class="bi bi-qr-code-scan me-2"></i>Get your QR
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero">
+    <div class="container position-relative">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="hero-badge">✦ Smart QR Customer System</div>
+                <h1>Manage Customers<br>With a <span>Single Scan</span></h1>
+                <p>Generate unique QR codes for every customer. Share a digital business card that opens instantly on any phone — no app needed.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="request-qr.html" class="btn-hero-primary">
+                        <i class="bi bi-qr-code-scan"></i> Get your QR
+                    </a>
+                    <a href="about.html" class="btn-hero-secondary">
+                        <i class="bi bi-info-circle"></i> Learn More
+                    </a>
+                </div>
+                <div class="d-flex gap-4 mt-5">
+                    <div class="hero-stat">
+                        <h3>QR</h3>
+                        <p>Auto Generated</p>
+                    </div>
+                    <div class="hero-stat" style="border-left:1px solid rgba(255,255,255,0.1); border-right:1px solid rgba(255,255,255,0.1);">
+                        <h3>vCard</h3>
+                        <p>1-tap Save Contact</p>
+                    </div>
+                    <div class="hero-stat">
+                        <h3>Cloud</h3>
+                        <p>Cloudinary Images</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="hero-mockup">
+                    <!-- Realistic SVG QR Code -->
+                    <div class="qr-preview">
+                        <div class="qr-scan-line"></div>
+                        <svg class="qr-svg" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Top-Left Finder -->
+                            <rect x="1" y="1" width="9" height="9" rx="1.5" fill="#6366f1"/>
+                            <rect x="2.5" y="2.5" width="6" height="6" rx="1" fill="white"/>
+                            <rect x="3.5" y="3.5" width="4" height="4" rx="0.5" fill="#6366f1"/>
+                            <!-- Top-Right Finder -->
+                            <rect x="27" y="1" width="9" height="9" rx="1.5" fill="#6366f1"/>
+                            <rect x="28.5" y="2.5" width="6" height="6" rx="1" fill="white"/>
+                            <rect x="29.5" y="3.5" width="4" height="4" rx="0.5" fill="#6366f1"/>
+                            <!-- Bottom-Left Finder -->
+                            <rect x="1" y="27" width="9" height="9" rx="1.5" fill="#6366f1"/>
+                            <rect x="2.5" y="28.5" width="6" height="6" rx="1" fill="white"/>
+                            <rect x="3.5" y="29.5" width="4" height="4" rx="0.5" fill="#6366f1"/>
+                            <!-- Data modules (simulated pattern) -->
+                            <rect x="12" y="1" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="14.5" y="1" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="18" y="1" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="21" y="1" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="23.5" y="1" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="12" y="3.5" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="16" y="3.5" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="21" y="3.5" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="13.5" y="6" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="17" y="6" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="20" y="6" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="12" y="8.5" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="17" y="8.5" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="21" y="8.5" width="3.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <!-- Row 12 -->
+                            <rect x="1" y="12" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="4" y="12" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="7" y="12" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="12" y="12" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="17" y="12" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="20" y="12" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="23" y="12" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="27" y="12" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="30" y="12" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="33" y="12" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <!-- Row 14 -->
+                            <rect x="1" y="14.5" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="6" y="14.5" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="12" y="14.5" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="15" y="14.5" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="20" y="14.5" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="25" y="14.5" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="28" y="14.5" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="33" y="14.5" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <!-- Row 17 -->
+                            <rect x="2" y="17" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="5" y="17" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="12" y="17" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="17" y="17" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="22" y="17" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="25" y="17" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="30" y="17" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <!-- Row 19 -->
+                            <rect x="1" y="19.5" width="1.5" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="4" y="19.5" width="3" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="9" y="19.5" width="1.5" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="13" y="19.5" width="1.5" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="16" y="19.5" width="1.5" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="19" y="19.5" width="3" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="24" y="19.5" width="1.5" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="27" y="19.5" width="3" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="32" y="19.5" width="3" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <!-- Row 22 -->
+                            <rect x="12" y="22" width="1.5" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="15" y="22" width="3" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="20" y="22" width="1.5" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="23" y="22" width="3" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="28" y="22" width="1.5" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <rect x="31" y="22" width="3" height="1.5" rx="0.3" fill="#a855f7"/>
+                            <!-- Row 24-25 -->
+                            <rect x="12" y="24.5" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="17" y="24.5" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="21" y="24.5" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="26" y="24.5" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="29" y="24.5" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="33" y="24.5" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <!-- Bottom row extras -->
+                            <rect x="12" y="27" width="1.5" height="3" rx="0.3" fill="#6366f1"/>
+                            <rect x="15" y="28" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="20" y="27" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="23" y="28" width="1.5" height="3" rx="0.3" fill="#6366f1"/>
+                            <rect x="26" y="27" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="31" y="28" width="1.5" height="3" rx="0.3" fill="#6366f1"/>
+                            <rect x="34" y="27" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="12" y="31" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="17" y="31" width="1.5" height="3" rx="0.3" fill="#6366f1"/>
+                            <rect x="20" y="31" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="25" y="31" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="28.5" y="31" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="33" y="31" width="1.5" height="3" rx="0.3" fill="#6366f1"/>
+                            <rect x="12" y="34" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="15" y="34" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="19" y="34" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="24" y="34" width="3" height="1.5" rx="0.3" fill="#6366f1"/>
+                            <rect x="29" y="34" width="1.5" height="1.5" rx="0.3" fill="#6366f1"/>
+                        </svg>
+                    </div>
+                    <!-- Brand info below QR -->
+                    <div style="margin-bottom:16px;">
+                        <div style="display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#a5b4fc" stroke-width="2"/><path d="M12 8v4l3 3" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/></svg>
+                            <span style="color:rgba(165,180,252,0.9); font-size:0.72rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;">Scan to Connect</span>
+                        </div>
+                        <p style="color:rgba(255,255,255,0.9); font-weight:800; font-size:1.1rem; margin-bottom:2px; letter-spacing:-0.01em;">QR Pro</p>
+                        <p style="color:rgba(255,255,255,0.4); font-size:0.78rem; margin-bottom:0; letter-spacing:0.04em;">Smart Customer Management</p>
+                    </div>
+                    <!-- Website feature tags -->
+                    <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+                        <span style="background:rgba(99,102,241,0.25); color:#a5b4fc; padding:7px 13px; border-radius:10px; font-size:0.75rem; font-weight:700; border:1px solid rgba(99,102,241,0.35); display:flex; align-items:center; gap:5px;">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="#a5b4fc"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM19 19h-2v-2h2v2zM15 15h-2v2h2v-2zM15 19h-2v2h2v-2zM17 17h2v-2h-2v2zM19 21h2v-2h-2v2zM21 15h-2v2h2v-2z"/></svg>
+                            Generate
+                        </span>
+                        <span style="background:rgba(168,85,247,0.25); color:#d8b4fe; padding:7px 13px; border-radius:10px; font-size:0.75rem; font-weight:700; border:1px solid rgba(168,85,247,0.35); display:flex; align-items:center; gap:5px;">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="#d8b4fe"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+                            Share
+                        </span>
+                        <span style="background:rgba(236,72,153,0.25); color:#fbcfe8; padding:7px 13px; border-radius:10px; font-size:0.75rem; font-weight:700; border:1px solid rgba(236,72,153,0.35); display:flex; align-items:center; gap:5px;">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="#fbcfe8"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                            Manage
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════ FEATURES ══════════════ -->
+<section class="features">
+    <div class="container">
+        <div class="text-center">
+            <div class="section-label">What We Offer</div>
+            <h2 class="section-title">Everything You Need</h2>
+            <p class="section-sub">A complete QR-powered customer management system built for speed and simplicity.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon"><i class="bi bi-qr-code-scan"></i></div>
+                        <svg class="feature-bg-shape" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="var(--primary)" d="M44.7,-76.4C58.1,-69.2,69.2,-58.1,76.4,-44.7C83.6,-31.3,86.9,-15.7,85.1,-0.9C83.4,13.8,76.6,27.7,68.4,40.1C60.2,52.5,50.7,63.4,38.7,70.9C26.7,78.4,13.4,82.4,-0.6,83.4C-14.6,84.4,-29.2,82.4,-42.1,75.4C-55,68.4,-66.1,56.4,-73.9,42.7C-81.7,29.1,-86.1,14.6,-85.7,0.2C-85.3,-14.1,-80.1,-28.3,-71.8,-41C-63.5,-53.7,-52.1,-64.8,-39.1,-72.3C-26.1,-79.8,-13.1,-83.7,0.8,-85.1C14.7,-86.4,29.4,-85.1,44.7,-76.4Z" transform="translate(100 100)" opacity="0.1" />
+                        </svg>
+                    </div>
+                    <h5>Auto QR Generation</h5>
+                    <p>Every customer gets a unique QR code instantly. Print it, download it, or share it — takes 2 seconds.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon" style="background:rgba(168,85,247,0.1); color:#a855f7;"><i class="bi bi-phone"></i></div>
+                        <svg class="feature-bg-shape" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="#a855f7" d="M38.1,-65.4C50.2,-58.8,61.4,-49.6,68.5,-37.8C75.6,-26.1,78.5,-11.7,76.9,2.2C75.3,16,69.1,29.4,60,40.5C50.9,51.6,38.8,60.4,25.6,65.8C12.4,71.2,-1.9,73.2,-16,71.1C-30.1,69,-44,62.8,-55.1,52.7C-66.2,42.5,-74.6,28.3,-77.8,13.1C-81.1,-2.2,-79.2,-18.5,-72.2,-32.2C-65.1,-45.8,-53,-56.9,-39.9,-63C-26.7,-69.1,-12.4,-70.3,0.9,-71.8C14.2,-73.3,26,-72,38.1,-65.4Z" transform="translate(100 100)" opacity="0.1" />
+                        </svg>
+                    </div>
+                    <h5>Mobile Digital Card</h5>
+                    <p>Scanning the QR opens a beautiful digital business card on any mobile phone — no app required.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon" style="background:rgba(16,185,129,0.1); color:#10b981;"><i class="bi bi-person-check"></i></div>
+                        <svg class="feature-bg-shape" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="#10b981" d="M47.5,-77.2C61.4,-70.5,72.6,-57.1,79.5,-42C86.4,-26.9,89.1,-10.1,87.3,6.2C85.5,22.5,79.2,38.3,69.1,51C59,63.7,45.2,73.3,30.3,78.7C15.4,84.1,-0.5,85.3,-16.1,82.8C-31.7,80.3,-47,74.1,-59.7,64.2C-72.4,54.3,-82.5,40.7,-86.3,25.6C-90.1,10.5,-87.6,-6.1,-81.2,-20.9C-74.8,-35.7,-64.5,-48.7,-51.6,-55.8C-38.7,-62.9,-23.2,-64,-8.8,-63.3C5.6,-62.6,20,-60.1,47.5,-77.2Z" transform="translate(100 100)" opacity="0.1" />
+                        </svg>
+                    </div>
+                    <h5>Save as vCard</h5>
+                    <p>One tap adds the customer's full contact details directly into the phone's address book.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon" style="background:rgba(245,158,11,0.1); color:#f59e0b;"><i class="bi bi-moon-stars"></i></div>
+                        <svg class="feature-bg-shape" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="#f59e0b" d="M45.1,-75.7C58.1,-68.1,68.2,-55.1,75.3,-41C82.4,-26.9,86.5,-11.7,84.9,2.9C83.3,17.5,76,31.5,66.4,43.2C56.8,54.9,44.9,64.3,31.7,70.1C18.5,75.9,4,78.1,-11.1,76.5C-26.2,74.9,-41.9,69.5,-54.6,59.9C-67.3,50.3,-77,36.5,-81.4,21.3C-85.8,6.1,-84.9,-10.5,-79,-25.2C-73.1,-39.9,-62.2,-52.7,-49.2,-60.3C-36.2,-67.9,-21.1,-70.3,-5.7,-71.4C9.7,-72.5,25.1,-72.3,45.1,-75.7Z" transform="translate(100 100)" opacity="0.1" />
+                        </svg>
+                    </div>
+                    <h5>Dark / Light Mode</h5>
+                    <p>Switchable dark and light themes on both the dashboard and the customer profile card.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════ CTA ══════════════ -->
+<section class="cta-section">
+    <div class="container position-relative">
+        <h2>Ready to Get Started?</h2>
+        <p>Log in to your admin panel and start managing customers with QR codes today.</p>
+        <a href="request-qr.html" class="btn-hero-primary d-inline-flex">
+            <i class="bi bi-qr-code-scan"></i> Get Your QR Now
+        </a>
+    </div>
+</section>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="main-footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <a class="footer-logo" href="index.html">
+                    <i class="bi bi-qr-code-scan"></i>QR Pro
+                </a>
+                <p class="footer-description">
+                    The next generation of customer management. Generate, share, and manage digital profiles with ease. Built for speed, designed for results.
+                </p>
+                <div class="social-links">
+                    <a href="#" class="social-btn"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="social-btn"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" class="social-btn"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="social-btn"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <h5 class="footer-heading">Quick Links</h5>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="request-qr.html">Get your QR</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="footer-heading">Our Services</h5>
+                <ul class="footer-links">
+                    <li><a href="#">QR Generation</a></li>
+                    <li><a href="#">Digital vCards</a></li>
+                    <li><a href="#">Cloud Hosting</a></li>
+                    <li><a href="#">Data Analytics</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="footer-heading">Support</h5>
+                <ul class="footer-links">
+                    <li><a href="contact.html">Help Center</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="mailto:support@qrpro.com">support@qrpro.com</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 QR Pro. All rights reserved. Crafted with <i class="bi bi-heart-fill text-danger"></i> for modern businesses.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+    // Local theme overrides for index page if script.js init isn't enough
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggle = document.getElementById('theme-toggle');
+        if (toggle) {
+            // The theme is handled by script.js initTheme()
+            // This inline script was redundant or conflicting
+        }
+    });
+</script>
+</body>
+</html>

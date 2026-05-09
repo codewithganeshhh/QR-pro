@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us — QR Pro</title>
+    <meta name="description" content="Learn about QR Pro — a smart QR-based customer management platform.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-color); transition: background 0.3s, color 0.3s; }
+
+
+
+        .page-hero {
+            background: linear-gradient(135deg, #0f0c29, #302b63);
+            padding: 100px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 60%, rgba(99, 102, 241, 0.3) 0, transparent 60%);
+        }
+
+        .page-hero h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .page-hero p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.05rem;
+        }
+
+        .about-section { padding: 90px 0; background: var(--bg); transition: background 0.3s; }
+        .card-about {
+            background: var(--card-bg); border-radius: 24px; padding: 40px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow); height: 100%; transition: background 0.3s;
+        }
+        .card-about h4 { font-weight: 800; margin-bottom: 12px; color: var(--text); }
+        .card-about p  { color: var(--muted); line-height: 1.7; }
+
+        .about-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.7rem;
+            margin-bottom: 24px;
+        }
+
+        .mission-section {
+            background: linear-gradient(135deg, #0f0c29, #302b63);
+            padding: 90px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.25) 0, transparent 55%);
+        }
+
+        .mission-section h2 {
+            color: white;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .mission-section p {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .value-chip {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #a5b4fc;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            margin: 6px 4px;
+        }
+
+        footer {
+            background: #0f0c29;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            padding: 28px 20px;
+            font-size: 0.88rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        footer a {
+            color: #a5b4fc;
+            text-decoration: none;
+        }
+        /* Professional Footer Styling */
+        .main-footer {
+            background: var(--navbar-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--navbar-border);
+            padding: 80px 0 30px;
+            margin-top: 0;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+        .footer-logo {
+            font-weight: 800;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            text-decoration: none;
+        }
+        .footer-description {
+            opacity: 0.7;
+            font-size: 0.98rem;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            max-width: 320px;
+        }
+        .footer-heading {
+            font-weight: 700;
+            font-size: 1.15rem;
+            margin-bottom: 25px;
+            position: relative;
+            color: var(--text);
+        }
+        .footer-heading::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 35px;
+            height: 2.5px;
+            background: #6366f1;
+            border-radius: 2px;
+        }
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .footer-links li {
+            margin-bottom: 14px;
+        }
+        .footer-links a {
+            text-decoration: none;
+            color: var(--text);
+            opacity: 0.65;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .footer-links a:hover {
+            opacity: 1;
+            color: #6366f1;
+            transform: translateX(6px);
+        }
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+        .social-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.08);
+            color: #6366f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        .social-btn:hover {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+            border-color: transparent;
+        }
+        .footer-bottom {
+            border-top: 1px solid var(--card-border);
+            margin-top: 60px;
+            padding-top: 30px;
+            text-align: center;
+            font-size: 0.92rem;
+        }
+        .footer-bottom p {
+            opacity: 0.6;
+            margin: 0;
+        }
+        [data-theme="dark"] .main-footer {
+            background: rgba(13, 15, 24, 0.98);
+        }
+        [data-theme="dark"] .social-btn {
+            background: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-qr-code-scan me-2"></i>QR Pro
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="about.html">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                    <li class="nav-item ms-2 d-flex align-items-center gap-2">
+                        <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+                            <i class="bi bi-moon-fill"></i>
+                        </button>
+                        <a class="btn-admin" href="request-qr.html">
+                            <i class="bi bi-qr-code-scan me-2"></i>Get your QR
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-hero">
+        <div class="container position-relative">
+            <h1>About QR Pro</h1>
+            <p>A modern, QR-powered customer management platform built for businesses of all sizes.</p>
+        </div>
+    </div>
+
+    <section class="about-section">
+        <div class="container">
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="card-about">
+                        <div class="about-icon"><i class="bi bi-lightbulb-fill"></i></div>
+                        <h4>Our Vision</h4>
+                        <p>To make every business interaction smarter by replacing paper business cards with instant,
+                            scannable digital profiles.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-about">
+                        <div class="about-icon"><i class="bi bi-rocket-takeoff-fill"></i></div>
+                        <h4>Our Mission</h4>
+                        <p>To give businesses a fast, simple, and professional way to manage customer data and share
+                            contact information with a single QR scan.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-about">
+                        <div class="about-icon"><i class="bi bi-people-fill"></i></div>
+                        <h4>Who We Serve</h4>
+                        <p>Freelancers, small businesses, enterprises — anyone who meets clients and wants to make a
+                            lasting first impression.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mission-section">
+        <div class="container position-relative">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6">
+                    <h2>Built with modern technology, designed for real people.</h2>
+                    <p>QR Pro was created to solve a simple problem: when you meet a customer, sharing your details
+                        should take one second — not ten. We built a system that lets you generate a unique QR code per
+                        customer, and when that QR is scanned, it opens a beautifully designed digital profile card
+                        instantly.</p>
+                    <div class="mt-4">
+                        <span class="value-chip">✦ Cloudinary Images</span>
+                        <span class="value-chip">✦ vCard Export</span>
+                        <span class="value-chip">✦ QR Auto-Generate</span>
+                        <span class="value-chip">✦ Dark Mode</span>
+                        <span class="value-chip">✦ Mobile First</span>
+                        <span class="value-chip">✦ Vercel Hosted</span>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div
+                                style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:28px; text-align:center;">
+                                <i class="bi bi-qr-code" style="font-size:2.2rem; color:#a5b4fc;"></i>
+                                <h4 style="color:white; font-weight:800; margin-top:12px;">QR Codes</h4>
+                                <p style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin:0;">Auto-generated for
+                                    every customer</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div
+                                style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:28px; text-align:center;">
+                                <i class="bi bi-shield-check" style="font-size:2.2rem; color:#d8b4fe;"></i>
+                                <h4 style="color:white; font-weight:800; margin-top:12px;">Secure</h4>
+                                <p style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin:0;">Admin-protected
+                                    dashboard</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div
+                                style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:28px; text-align:center;">
+                                <i class="bi bi-cloud-check" style="font-size:2.2rem; color:#86efac;"></i>
+                                <h4 style="color:white; font-weight:800; margin-top:12px;">Cloud Ready</h4>
+                                <p style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin:0;">Hosted on Vercel,
+                                    images on Cloudinary</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div
+                                style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:28px; text-align:center;">
+                                <i class="bi bi-phone" style="font-size:2.2rem; color:#fda4af;"></i>
+                                <h4 style="color:white; font-weight:800; margin-top:12px;">Mobile</h4>
+                                <p style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin:0;">Works on every
+                                    phone, no app needed Scan With Mobile</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<footer class="main-footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <a class="footer-logo" href="index.html">
+                    <i class="bi bi-qr-code-scan"></i>QR Pro
+                </a>
+                <p class="footer-description">
+                    The next generation of customer management. Generate, share, and manage digital profiles with ease. Built for speed, designed for results.
+                </p>
+                <div class="social-links">
+                    <a href="#" class="social-btn"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="social-btn"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" class="social-btn"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="social-btn"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <h5 class="footer-heading">Quick Links</h5>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="request-qr.html">Get your QR</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="footer-heading">Our Services</h5>
+                <ul class="footer-links">
+                    <li><a href="#">QR Generation</a></li>
+                    <li><a href="#">Digital vCards</a></li>
+                    <li><a href="#">Cloud Hosting</a></li>
+                    <li><a href="#">Data Analytics</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="footer-heading">Support</h5>
+                <ul class="footer-links">
+                    <li><a href="contact.html">Help Center</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="mailto:support@qrpro.com">support@qrpro.com</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 QR Pro. All rights reserved. Crafted with <i class="bi bi-heart-fill text-danger"></i> for modern businesses.</p>
+        </div>
+    </div>
+</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+
+</html>
