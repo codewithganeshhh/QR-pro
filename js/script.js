@@ -1,7 +1,13 @@
 // Global State
-let customers = JSON.parse(localStorage.getItem('qr_customers')) || [];
+let customers = [];
+let pendingRequests = [];
 let qrcodeInstance = null;
 let currentQRId = null;
+
+// Auto-detect API URL: use relative path on production, localhost for development
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000/api'
+    : '/api';
 
 // --- CLOUDINARY CONFIGURATION ---
 // Replace these with your own details from Cloudinary dashboard
@@ -10,12 +16,13 @@ const CLOUDINARY_UPLOAD_PRESET = 'demo qr';
 // --------------------------------
 
 // Initialization
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
 
     // Determine context based on DOM elements
     if (document.getElementById('customer-table-body')) {
         // Admin Dashboard
+        await fetchData();
         renderTable();
         updateStats();
         setupImageUpload();
@@ -36,9 +43,25 @@ document.addEventListener('DOMContentLoaded', () => {
         loadProfileData();
     } else if (document.getElementById('qrScanRegistrationForm')) {
         // Scan Page
+        await fetchData();
         initScanPage();
     }
 });
+
+async function fetchData() {
+    try {
+        const custRes = await fetch(`${API_BASE_URL}/customers`);
+        if (custRes.ok) {
+            customers = await custRes.json();
+        }
+        const reqRes = await fetch(`${API_BASE_URL}/requests`);
+        if (reqRes.ok) {
+            pendingRequests = await reqRes.json();
+        }
+    } catch (err) {
+        console.error("Failed to fetch data:", err);
+    }
+}
 
 // Theme Management
 function initTheme() {
@@ -141,7 +164,7 @@ function generateId() {
 }
 
 // Save Customer (Handles both Add and Edit)
-function saveCustomer() {
+async function saveCustomer() {
     const idField = document.getElementById('customerId').value;
     const name = document.getElementById('custName').value.trim();
     const company = document.getElementById('custCompany').value.trim();
@@ -157,7 +180,7 @@ function saveCustomer() {
         return;
     }
 
-    const customer = {
+    const customerData = {
         id: idField || generateId(),
         name,
         company,
@@ -166,36 +189,35 @@ function saveCustomer() {
         address,
         notes,
         cloudinaryUrl,
-        // Fallback hierarchy: 1. Cloudinary, 2. Base64, 3. UI Avatar
-        image: cloudinaryUrl || imageBase64 || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=200`,
-        timestamp: new Date().toISOString()
+        image: cloudinaryUrl || imageBase64 || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=200`
     };
 
-    if (idField) {
-        // Update existing
-        const index = customers.findIndex(c => c.id === idField);
-        if (index > -1) customers[index] = customer;
-        showToast('Customer profile updated successfully!', 'success');
-    } else {
-        // Add new
-        customers.push(customer);
-        showToast('New customer added successfully!', 'success');
-    }
-
-    // Save to localStorage
     try {
-        localStorage.setItem('qr_customers', JSON.stringify(customers));
+        const url = idField ? `${API_BASE_URL}/customers/${idField}` : `${API_BASE_URL}/customers`;
+        const method = idField ? 'PUT' : 'POST';
+        
+        const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(customerData)
+        });
+
+        if (res.ok) {
+            showToast(idField ? 'Customer profile updated successfully!' : 'New customer added successfully!', 'success');
+            await fetchData(); // Refresh data from backend
+            
+            // Reset and close modal
+            bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
+            
+            renderTable();
+            updateStats();
+        } else {
+            showToast('Failed to save customer data.', 'danger');
+        }
     } catch (e) {
-        // Handle QuotaExceededError (localStorage limit ~5MB)
-        showToast('Storage full! Please clear some data or reduce image sizes.', 'danger');
-        return;
+        console.error('Error saving customer:', e);
+        showToast('Network error saving customer!', 'danger');
     }
-
-    // Reset and close modal
-    bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
-
-    renderTable();
-    updateStats();
 }
 
 // Render Table
@@ -249,13 +271,18 @@ function renderTable() {
 }
 
 // Update Dashboard Stats
-function updateStats() {
+async function updateStats() {
     const el = document.getElementById('total-customers');
     if (el) el.innerText = customers.length;
     
-    const pendingRequests = JSON.parse(localStorage.getItem('qr_pending_requests')) || [];
-    const pendingEl = document.getElementById('pending-count-badge');
-    if (pendingEl) pendingEl.innerText = pendingRequests.length;
+    try {
+        const res = await fetch(`${API_BASE_URL}/requests`);
+        const pendingReqs = res.ok ? await res.json() : [];
+        const pendingEl = document.getElementById('pending-count-badge');
+        if (pendingEl) pendingEl.innerText = pendingReqs.length;
+    } catch (e) {
+        console.error("Error updating stats:", e);
+    }
 }
 
 // Edit Customer
@@ -282,13 +309,22 @@ function editCustomer(id) {
 }
 
 // Delete Customer
-function deleteCustomer(id) {
+async function deleteCustomer(id) {
     if (confirm('Are you sure you want to permanently delete this customer?')) {
-        customers = customers.filter(x => x.id !== id);
-        localStorage.setItem('qr_customers', JSON.stringify(customers));
-        renderTable();
-        updateStats();
-        showToast('Customer deleted successfully.', 'warning text-dark');
+        try {
+            const res = await fetch(`${API_BASE_URL}/customers/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                await fetchData();
+                renderTable();
+                updateStats();
+                showToast('Customer deleted successfully.', 'warning text-dark');
+            } else {
+                showToast('Failed to delete customer.', 'danger');
+            }
+        } catch (e) {
+            console.error('Error deleting customer:', e);
+            showToast('Network error.', 'danger');
+        }
     }
 }
 
@@ -324,7 +360,7 @@ function showQR(id) {
     }
 
     const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(compactData))));
-    const profileUrl = `${currentUrl}/profile.html?data=${encodedData}`;
+    const profileUrl = `${currentUrl}/profile.html?data=${encodedData}&id=${customer.id}`;
 
     qrcodeInstance = new QRCode(qrContainer, {
         text: profileUrl,
@@ -462,10 +498,26 @@ function printQR() {
     }
 }
 
-function printBlankQR() {
+async function printBlankQR() {
     // Generate a unique ID for the new blank QR
     const blankId = 'QR-' + Math.random().toString(36).substr(2, 6).toUpperCase();
     
+    // Save to backend immediately so it is "visible to all"
+    try {
+        await fetch(`${API_BASE_URL}/customers/blank`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: blankId })
+        });
+        await fetchData();
+        if (document.getElementById('customer-table-body')) {
+            renderTable();
+            updateStats();
+        }
+    } catch (e) {
+        console.error("Failed to save blank QR to backend:", e);
+    }
+
     // Get the base URL
     const currentUrl = window.location.href.split('/').slice(0, -1).join('/');
     const scanUrl = `${currentUrl}/scan.html?id=${blankId}`;
@@ -647,9 +699,10 @@ function importData(event) {
 // ----------------------------------------------------
 // Profile Page Logic
 // ----------------------------------------------------
-function loadProfileData() {
+async function loadProfileData() {
     const params = new URLSearchParams(window.location.search);
     const dataParam = params.get('data');
+    const idParam = params.get('id');
     let customer = null;
 
     // First, try to get data encoded in the URL (for mobile scanners)
@@ -671,14 +724,26 @@ function loadProfileData() {
         }
     }
 
-    // If no URL data, fallback to searching localStorage (for admin preview)
-    if (!customer) {
-        const id = params.get('id');
-        customer = customers.find(c => c.id === id);
+    // If no URL data or if we have an ID, fetch from backend for the most up-to-date info
+    if (!customer && idParam) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/customers/${idParam}`);
+            if (res.ok) {
+                customer = await res.json();
+            }
+        } catch (e) {
+            console.error("Failed to fetch customer from backend:", e);
+        }
     }
 
-    if (customer) {
+    // Fallback to local array if still not found (though fetchData should have run if on Admin/Scan)
+    if (!customer && idParam) {
+        customer = customers.find(c => c.id === idParam);
+    }
+
+    if (customer && customer.status !== 'unclaimed') {
         document.getElementById('profileCard').style.display = 'block';
+        document.getElementById('errorCard').style.display = 'none';
 
         document.title = `${customer.name} — Digital Card`;
         document.getElementById('p-img').src = customer.image;
@@ -712,8 +777,11 @@ function loadProfileData() {
         if (customer.notes) {
             document.getElementById('notes-container').style.display = 'block';
             document.getElementById('p-notes').innerText = customer.notes;
+        } else {
+             document.getElementById('notes-container').style.display = 'none';
         }
     } else {
+        document.getElementById('profileCard').style.display = 'none';
         document.getElementById('errorCard').style.display = 'block';
     }
 }
@@ -763,13 +831,9 @@ function showToast(message, bgClass = 'success') {
     const toastEl = document.getElementById('liveToast');
     if (!toastEl) return;
 
-    // bg-success, bg-danger, bg-warning etc
     document.getElementById('toastMessage').innerText = message;
-
-    // Reset classes
     toastEl.className = `toast align-items-center border-0 shadow glass-card text-bg-${bgClass.split(' ')[0]}`;
 
-    // If it's warning, make text dark for readability
     if (bgClass.includes('text-dark')) {
         toastEl.classList.add('text-dark');
         const btnClose = toastEl.querySelector('.btn-close');
@@ -782,8 +846,9 @@ function showToast(message, bgClass = 'success') {
     const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
     toast.show();
 }
+
 // --- CUSTOMER REQUEST HANDLING (INDEX PAGE) ---
-function handleQRRequest(event) {
+async function handleQRRequest(event) {
     event.preventDefault();
     
     const requestData = {
@@ -799,16 +864,20 @@ function handleQRRequest(event) {
         status: 'pending'
     };
 
-    let pendingRequests = JSON.parse(localStorage.getItem('qr_pending_requests')) || [];
-    pendingRequests.push(requestData);
-    localStorage.setItem('qr_pending_requests', JSON.stringify(pendingRequests));
+    try {
+        await fetch(`${API_BASE_URL}/requests`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        });
 
-    // UI Transition
-    document.getElementById('qrRequestForm').style.display = 'none';
-    document.getElementById('requestSuccess').style.display = 'block';
-    
-    // Optional: Smooth scroll back to success message top
-    document.getElementById('get-qr').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('qrRequestForm').style.display = 'none';
+        document.getElementById('requestSuccess').style.display = 'block';
+        document.getElementById('get-qr').scrollIntoView({ behavior: 'smooth' });
+    } catch (e) {
+        console.error('Error saving request:', e);
+        alert('Failed to submit request. Please try again.');
+    }
 }
 
 // --- ADMIN REQUEST MANAGEMENT ---
@@ -816,7 +885,6 @@ function renderPendingRequests() {
     const container = document.getElementById('pending-requests-container');
     if (!container) return;
 
-    const pendingRequests = JSON.parse(localStorage.getItem('qr_pending_requests')) || [];
     const countBadge = document.getElementById('pending-count-badge');
     if (countBadge) countBadge.innerText = pendingRequests.length;
 
@@ -880,14 +948,11 @@ function renderPendingRequests() {
     container.innerHTML = html;
 }
 
-function approveRequest(reqId) {
-    let pendingRequests = JSON.parse(localStorage.getItem('qr_pending_requests')) || [];
-    const reqIndex = pendingRequests.findIndex(r => r.id === reqId);
-    
-    if (reqIndex > -1) {
-        const req = pendingRequests[reqIndex];
-        
-        // Create new customer from request
+async function approveRequest(reqId) {
+    try {
+        const req = pendingRequests.find(r => r.id === reqId);
+        if (!req) return;
+
         const newCustomer = {
             id: 'CUST-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
             name: req.name,
@@ -900,32 +965,48 @@ function approveRequest(reqId) {
             image: req.cloudinaryUrl || req.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(req.name)}&background=random&color=fff&size=200`
         };
 
-        customers.push(newCustomer);
-        localStorage.setItem('qr_customers', JSON.stringify(customers));
-        
-        // Remove from pending
-        pendingRequests.splice(reqIndex, 1);
-        localStorage.setItem('qr_pending_requests', JSON.stringify(pendingRequests));
-        
-        showToast('Request verified! Customer added to directory.', 'success');
-        renderTable();
-        updateStats();
-        renderPendingRequests();
+        const custRes = await fetch(`${API_BASE_URL}/customers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newCustomer)
+        });
+
+        if (custRes.ok) {
+            await fetch(`${API_BASE_URL}/requests/${reqId}`, { method: 'DELETE' });
+            showToast('Request verified! Customer added to directory.', 'success');
+            await fetchData();
+            renderTable();
+            updateStats();
+            renderPendingRequests();
+        } else {
+            showToast('Failed to approve request.', 'danger');
+        }
+    } catch (e) {
+        console.error('Error approving request:', e);
+        showToast('Network error.', 'danger');
     }
 }
 
-function rejectRequest(reqId) {
+async function rejectRequest(reqId) {
     if (confirm('Are you sure you want to reject this request?')) {
-        let pendingRequests = JSON.parse(localStorage.getItem('qr_pending_requests')) || [];
-        pendingRequests = pendingRequests.filter(r => r.id !== reqId);
-        localStorage.setItem('qr_pending_requests', JSON.stringify(pendingRequests));
-        
-        showToast('Request rejected.', 'info');
-        renderPendingRequests();
+        try {
+            const res = await fetch(`${API_BASE_URL}/requests/${reqId}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Request rejected.', 'info');
+                await fetchData();
+                renderPendingRequests();
+                updateStats();
+            } else {
+                showToast('Failed to reject request.', 'danger');
+            }
+        } catch (e) {
+            console.error('Error rejecting request:', e);
+            showToast('Network error.', 'danger');
+        }
     }
 }
 
-// Preview image for request form (Handles Base64 AND Cloudinary Upload)
+// Preview image for request form
 async function previewReqImage(input) {
     const file = input.files[0];
     if (!file) return;
@@ -934,7 +1015,6 @@ async function previewReqImage(input) {
     const uploadSuccess = document.getElementById('reqUploadSuccess');
     const submitBtn = document.querySelector('button[type="submit"]');
 
-    // 1. Local Preview (Base64)
     const reader = new FileReader();
     reader.onload = function(e) {
         document.getElementById('reqImagePreview').src = e.target.result;
@@ -944,11 +1024,7 @@ async function previewReqImage(input) {
     };
     reader.readAsDataURL(file);
 
-    // 2. Cloudinary Upload
-    if (CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME' || !CLOUDINARY_CLOUD_NAME) {
-        console.warn("Cloudinary not configured for user requests.");
-        return;
-    }
+    if (CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME' || !CLOUDINARY_CLOUD_NAME) return;
 
     try {
         if (uploadStatus) uploadStatus.style.display = 'block';
@@ -965,25 +1041,21 @@ async function previewReqImage(input) {
         });
 
         const data = await response.json();
-
         if (data.secure_url) {
             document.getElementById('reqImageCloudinaryUrl').value = data.secure_url;
             if (uploadStatus) uploadStatus.style.display = 'none';
             if (uploadSuccess) uploadSuccess.style.display = 'block';
-        } else {
-            throw new Error("Upload failed");
         }
     } catch (err) {
         console.error("Cloudinary Request Error:", err);
         if (uploadStatus) uploadStatus.style.display = 'none';
-        alert("Image cloud upload failed. Profile may show a default avatar when scanned.");
     } finally {
         if (submitBtn) submitBtn.disabled = false;
     }
 }
 
 // --- DYNAMIC REUSABLE QR SCAN LOGIC ---
-function initScanPage() {
+async function initScanPage() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
 
@@ -994,14 +1066,12 @@ function initScanPage() {
         return;
     }
 
-    // Check if profile exists
-    const customer = customers.find(c => c.id === id);
+    // Check if profile exists and is active
+    const customer = customers.find(c => c.id === id && c.status === 'active');
 
     if (customer) {
-        // Data exists! Redirect to profile page
         window.location.href = `profile.html?id=${id}`;
     } else {
-        // No data exists, show registration form
         document.getElementById('loader').classList.add('d-none');
         document.getElementById('navbar').classList.remove('d-none');
         document.getElementById('hero-section').classList.remove('d-none');
@@ -1011,7 +1081,7 @@ function initScanPage() {
     }
 }
 
-function handleScanRegistration(event) {
+async function handleScanRegistration(event) {
     event.preventDefault();
     
     const id = document.getElementById('scanQrId').value;
@@ -1025,7 +1095,7 @@ function handleScanRegistration(event) {
     const cloudinaryUrl = document.getElementById('scanImageCloudinaryUrl').value;
     const imageBase64 = document.getElementById('scanImageBase64').value;
     
-    const newCustomer = {
+    const customerData = {
         id: id,
         name: name,
         email: document.getElementById('scanEmail').value.trim(),
@@ -1035,17 +1105,25 @@ function handleScanRegistration(event) {
         notes: document.getElementById('scanNotes').value.trim(),
         cloudinaryUrl: cloudinaryUrl,
         image: cloudinaryUrl || imageBase64 || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=200`,
+        status: 'active',
         timestamp: new Date().toISOString()
     };
 
-    customers.push(newCustomer);
-    
     try {
-        localStorage.setItem('qr_customers', JSON.stringify(customers));
-        // Redirect to their new profile!
-        window.location.href = `profile.html?id=${id}`;
+        const res = await fetch(`${API_BASE_URL}/customers/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(customerData)
+        });
+
+        if (res.ok) {
+            window.location.href = `profile.html?id=${id}`;
+        } else {
+            showToast('Registration failed.', 'danger');
+        }
     } catch (e) {
-        showToast('Storage full! Please reduce image size.', 'danger');
+        console.error('Registration Error:', e);
+        showToast('Network error during registration.', 'danger');
     }
 }
 
@@ -1057,7 +1135,6 @@ async function previewScanImage(input) {
     const uploadSuccess = document.getElementById('scanUploadSuccess');
     const submitBtn = document.getElementById('scanSubmitBtn');
 
-    // 1. Local Preview (Base64)
     const reader = new FileReader();
     reader.onload = function(e) {
         document.getElementById('scanImagePreview').src = e.target.result;
@@ -1067,10 +1144,7 @@ async function previewScanImage(input) {
     };
     reader.readAsDataURL(file);
 
-    // 2. Cloudinary Upload
-    if (CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME' || !CLOUDINARY_CLOUD_NAME) {
-        return;
-    }
+    if (CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME' || !CLOUDINARY_CLOUD_NAME) return;
 
     try {
         if (uploadStatus) uploadStatus.style.display = 'block';
@@ -1087,18 +1161,14 @@ async function previewScanImage(input) {
         });
 
         const data = await response.json();
-
         if (data.secure_url) {
             document.getElementById('scanImageCloudinaryUrl').value = data.secure_url;
             if (uploadStatus) uploadStatus.style.display = 'none';
             if (uploadSuccess) uploadSuccess.style.display = 'block';
-        } else {
-            throw new Error("Upload failed");
         }
     } catch (err) {
         console.error("Cloudinary Request Error:", err);
         if (uploadStatus) uploadStatus.style.display = 'none';
-        alert("Image cloud upload failed. Profile may show a default avatar.");
     } finally {
         if (submitBtn) submitBtn.disabled = false;
     }
